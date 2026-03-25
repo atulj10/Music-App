@@ -1,25 +1,41 @@
-import React from "react";
-import { Text, View, StyleSheet, FlatList, Image } from "react-native";
+import React, { memo } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  FlatList,
+  Image,
+  Pressable,
+  ListRenderItem,
+  ImageSourcePropType,
+} from "react-native";
 
 interface HorizontalScrollSectionProps {
   title: string;
   data: DataProps[];
   borderRadius?: number;
+  onItemPress?: (item: DataProps) => void;
 }
 
 export interface DataProps {
-  id: number;
+  id: number | string;
   name: string;
-  image: any;
+  image: ImageSourcePropType;
 }
+
+const ITEM_SIZE = 100;
 
 const HorizontalScrollSection = ({
   title,
   data,
   borderRadius = 20,
+  onItemPress,
 }: HorizontalScrollSectionProps) => {
-  const renderItem = ({ item }: { item: DataProps }) => (
-    <View style={styles.item}>
+  const renderItem: ListRenderItem<DataProps> = ({ item }) => (
+    <Pressable
+      style={styles.item}
+      onPress={() => onItemPress?.(item)}
+    >
       <Image
         source={item.image}
         style={[
@@ -30,17 +46,24 @@ const HorizontalScrollSection = ({
         ]}
         resizeMode="cover"
       />
-      <Text style={styles.name}>
+
+      <Text
+        style={styles.name}
+        numberOfLines={1}
+      >
         {item.name}
       </Text>
-    </View>
+    </Pressable>
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.more}>See All</Text>
+
+        <Pressable>
+          <Text style={styles.more}>See All</Text>
+        </Pressable>
       </View>
 
       <FlatList
@@ -50,17 +73,24 @@ const HorizontalScrollSection = ({
         keyExtractor={(item) => item.id.toString()}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={<Text>No data available</Text>}
+        getItemLayout={(_, index) => ({
+          length: ITEM_SIZE + 14,
+          offset: (ITEM_SIZE + 14) * index,
+          index,
+        })}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={5}
       />
     </View>
   );
 };
 
-export default HorizontalScrollSection;
+export default memo(HorizontalScrollSection);
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
-    gap: 10,
     marginVertical: 14,
   },
 
@@ -88,17 +118,19 @@ const styles = StyleSheet.create({
   item: {
     alignItems: "center",
     marginRight: 14,
-    width:100
+    width: ITEM_SIZE,
   },
 
   image: {
-    width: 100,
-    height: 100,
+    width: ITEM_SIZE,
+    height: ITEM_SIZE,
+    backgroundColor: "#eee",
   },
 
   name: {
     fontSize: 15,
     fontWeight: "600",
-    marginTop: 4,
+    marginTop: 6,
+    textAlign: "center",
   },
 });

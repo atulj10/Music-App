@@ -10,7 +10,7 @@ import AlbumSection from "./Sections/AlbumsSection";
 interface TabSectionProps {}
 
 const TabSection = (props: TabSectionProps) => {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState(1);
 
   const tabs = [
     { title: "Suggested", page: SuggestedSection },
@@ -24,7 +24,7 @@ const TabSection = (props: TabSectionProps) => {
     setTab(index);
   };
 
-  const renderTab = ({ item, index }: any) => (
+  const renderTab = ({ item, index }: { item: { title: string }; index: number }) => (
     <Pressable onPress={() => handleTabPress(index)}>
       <Text
         style={[
@@ -40,15 +40,16 @@ const TabSection = (props: TabSectionProps) => {
   const ActiveComponent = tabs[tab].page;
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         data={tabs}
         horizontal
         keyExtractor={(item) => item.title}
         renderItem={renderTab}
         showsHorizontalScrollIndicator={false}
+        style={styles.tabList}
       />
-      <View style={{ marginTop: 15 }}>
+      <View style={styles.content}>
         <ActiveComponent />
       </View>
     </View>
@@ -58,6 +59,16 @@ const TabSection = (props: TabSectionProps) => {
 export default TabSection;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  tabList: {
+    flexGrow: 0,
+  },
+  content: {
+    flex: 1,
+    marginTop: 15,
+  },
   unActive: {
     color: "grey",
     padding: 10,

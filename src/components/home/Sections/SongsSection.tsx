@@ -8,6 +8,8 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 import VerticalList, { SongItem } from "../../VerticalList";
 import SongOptionsSheet, {
@@ -16,8 +18,11 @@ import SongOptionsSheet, {
 } from "../SongsOptionsSheet";
 
 import { useSongs } from "../../../hooks/useSongs";
+import { setCurrentSong } from "../../../store/slices/playerSlice";
 
 const SongsSection = () => {
+  const navigation = useNavigation<any>();
+  const dispatch = useDispatch();
   const bottomSheetRef = useRef<SongOptionsSheetRef>(null);
 
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
@@ -25,7 +30,14 @@ const SongsSection = () => {
   const { songs, loading, error } = useSongs("top hindi songs");
 
   const handlePlayPress = (song: SongItem) => {
-    console.log("Play:", song.title);
+    dispatch(setCurrentSong({
+      id: song.id,
+      title: song.title,
+      artist: song.artist,
+      duration: song.duration,
+      image: song.image,
+    }));
+    navigation.navigate("PlayerScreen");
   };
 
   const handleMorePress = (song: SongItem) => {
@@ -53,7 +65,7 @@ const SongsSection = () => {
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>Failed to load songs</Text>
 
-        <Pressable onPress={() => location.reload()}>
+        <Pressable onPress={() => {}}>
           <Text style={{ color: "orange" }}>Retry</Text>
         </Pressable>
       </View>

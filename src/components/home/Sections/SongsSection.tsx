@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 
 import SongOptionsSheet, {
@@ -20,6 +20,7 @@ import SongOptionsSheet, {
 } from "../SongsOptionsSheet";
 
 import { useSongs } from "../../../hooks/useSongs";
+import { RootState } from "../../../store";
 
 import {
   setCurrentSong,
@@ -31,26 +32,46 @@ const SongItemRow = ({
   item,
   onPlay,
   onMore,
+  isPlaying,
 }: {
   item: any;
   onPlay: () => void;
   onMore: () => void;
+  isPlaying: boolean;
 }) => (
-  <Pressable style={styles.songRow} onPress={onPlay}>
-    <Image source={item.image} style={styles.songImage} />
+  <Pressable
+    style={[styles.songRow, isPlaying && styles.songRowActive]}
+    onPress={onPlay}
+  >
+    <View style={styles.imageContainer}>
+      <Image source={item.image} style={styles.songImage} />
+      {isPlaying && (
+        <View style={styles.playingOverlay}>
+          <Ionicons name="musical-note" size={20} color="#fff" />
+        </View>
+      )}
+    </View>
 
     <View style={styles.songTextContainer}>
-      <Text numberOfLines={1} style={styles.songTitle}>
+      <Text
+        numberOfLines={1}
+        style={[styles.songTitle, isPlaying && styles.songTitleActive]}
+      >
         {item.title}
       </Text>
 
-      <Text numberOfLines={1} style={styles.songArtist}>
+      <Text
+        numberOfLines={1}
+        style={[styles.songArtist, isPlaying && styles.songArtistActive]}
+      >
         {item.artist}
       </Text>
     </View>
 
     <View style={styles.songActions}>
-      <Text style={styles.duration}>{item.duration}</Text>
+      <Text style={[styles.duration, isPlaying && styles.durationActive]}>
+        {item.duration}
+      </Text>
 
       <Pressable onPress={onMore} style={styles.moreBtn} hitSlop={10}>
         <Ionicons name="ellipsis-vertical" size={18} color="#666" />
@@ -68,6 +89,8 @@ const SongsSection = () => {
   const onEndReachedCalledDuringMomentum = useRef(false);
 
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
+
+  const currentSong = useSelector((state: RootState) => state.player.currentSong);
 
   const { songs, loading, loadingMore, error, hasMore, refetch, loadMore } =
     useSongs("top hindi songs");
@@ -163,6 +186,7 @@ const SongsSection = () => {
       item={item}
       onPlay={() => handlePlayPress(item)}
       onMore={() => handleMorePress(item)}
+      isPlaying={currentSong?.id === item.id}
     />
   );
 
@@ -319,10 +343,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
+  songRowActive: {
+    backgroundColor: "#FFF8E7",
+    borderRadius: 8,
+  },
+
+  imageContainer: {
+    position: "relative",
+  },
+
   songImage: {
     width: 50,
     height: 50,
     borderRadius: 8,
+  },
+
+  playingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 165, 0, 0.8)",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   songTextContainer: {
@@ -335,10 +380,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  songTitleActive: {
+    color: "#FFA500",
+  },
+
   songArtist: {
     fontSize: 13,
     color: "#666",
     marginTop: 2,
+  },
+
+  songArtistActive: {
+    color: "#FFA500",
   },
 
   songActions: {
@@ -350,6 +403,10 @@ const styles = StyleSheet.create({
   duration: {
     fontSize: 12,
     color: "#666",
+  },
+
+  durationActive: {
+    color: "#FFA500",
   },
 
   moreBtn: {

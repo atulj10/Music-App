@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { saavnApi } from "../services/saavnApi";
 import { SongItem } from "../components/VerticalList";
 
@@ -20,6 +20,7 @@ export const useSongs = (query: string = "top hindi songs") => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [currentQuery, setCurrentQuery] = useState(query);
+  const isFetchingRef = useRef(false);
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return "";
@@ -29,7 +30,11 @@ export const useSongs = (query: string = "top hindi songs") => {
   };
 
   const fetchSongs = useCallback(async (pageNum: number = 0, searchQuery?: string) => {
+    if (isFetchingRef.current) return;
+    
     try {
+      isFetchingRef.current = true;
+      
       if (pageNum === 0) {
         setLoading(true);
       } else {
@@ -41,7 +46,7 @@ export const useSongs = (query: string = "top hindi songs") => {
       const offset = pageNum * SONGS_PER_PAGE;
 
       const response = await saavnApi.get(
-        `/search/songs?query=${encodeURIComponent(queryToUse)}&limit=${SONGS_PER_PAGE}&offset=${offset}`
+        `/search/songs?query=${encodeURIComponent(queryToUse)}&limit=${SONGS_PER_PAGE}&page=${pageNum + 1}`
       );
 
       const results: SearchResult[] = response.data?.data?.results || [];
@@ -94,6 +99,7 @@ export const useSongs = (query: string = "top hindi songs") => {
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      isFetchingRef.current = false;
     }
   }, [currentQuery]);
 
@@ -105,11 +111,12 @@ export const useSongs = (query: string = "top hindi songs") => {
   }, [fetchSongs]);
 
   const loadMore = useCallback(() => {
-    if (!loadingMore && hasMore && !loading) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchSongs(nextPage);
+    if (loadingMore || !hasMore || loading || isFetchingRef.current) {
+      return;
     }
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchSongs(nextPage);
   }, [loadingMore, hasMore, loading, page, fetchSongs]);
 
   const refetch = useCallback(() => {
@@ -132,5 +139,6 @@ export const useSongs = (query: string = "top hindi songs") => {
     loadMore,
     search,
     currentQuery,
+    totalSongs: songs.length,
   };
 };

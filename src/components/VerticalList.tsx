@@ -7,6 +7,7 @@ import {
   Image,
   Pressable,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export interface SongItem {
   id: number | string;
@@ -47,11 +48,11 @@ const VerticalList = ({
       </View>
 
       <Pressable style={styles.playBtn} onPress={() => onPlayPress?.(item)}>
-        <Text style={styles.playIcon}>▶</Text>
+        <Ionicons name="play" size={18} color="orange" />
       </Pressable>
 
       <Pressable style={styles.moreBtn} onPress={() => onMorePress?.(item)}>
-        <Text style={styles.moreIcon}>⋮</Text>
+        <Ionicons name="ellipsis-vertical" size={18} color="#444" />
       </Pressable>
     </View>
   );
@@ -118,17 +119,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
 
-  playIcon: {
-    fontSize: 18,
-    color: "orange",
-  },
-
   moreBtn: {
     paddingHorizontal: 6,
-  },
-
-  moreIcon: {
-    fontSize: 18,
-    color: "#444",
   },
 });

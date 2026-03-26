@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { Provider } from "react-redux";
+import { Ionicons } from "@expo/vector-icons";
 import { store } from "./store";
 import Home from "./tabs/Home";
 import Favourites from "./tabs/Favourites";
@@ -20,7 +21,39 @@ const Stack = createNativeStackNavigator();
 function TabNavigator() {
   return (
     <View style={{ flex: 1 }}>
-      <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName: keyof typeof Ionicons.glyphMap;
+
+            if (route.name === "Home") {
+              iconName = focused ? "home" : "home-outline";
+            } else if (route.name === "Favourites") {
+              iconName = focused ? "heart" : "heart-outline";
+            } else if (route.name === "Settings") {
+              iconName = focused ? "settings" : "settings-outline";
+            } else if (route.name === "Queue") {
+              iconName = focused ? "list" : "list-outline";
+            } else {
+              iconName = "ellipse";
+            }
+
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: "#FFA500",
+          tabBarInactiveTintColor: "#666",
+          tabBarStyle: {
+            paddingBottom: 8,
+            paddingTop: 8,
+            height: 80,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "600",
+          },
+        })}
+      >
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Favourites" component={Favourites} />
         <Tab.Screen name="Settings" component={Settings} />

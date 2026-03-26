@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 import {
@@ -109,7 +110,7 @@ export default function QueueScreen() {
         <View style={styles.actions}>
           {isCurrentlyPlaying && (
             <View style={styles.playingIndicator}>
-              <Text style={styles.playingIcon}>🎵</Text>
+              <Ionicons name="musical-note" size={16} color="#FFA500" />
             </View>
           )}
 
@@ -118,7 +119,7 @@ export default function QueueScreen() {
               style={styles.removeBtn}
               onPress={() => handleRemoveFromQueue(index)}
             >
-              <Text style={styles.removeText}>✕</Text>
+              <Ionicons name="close" size={18} color="#FF3B30" />
             </Pressable>
           )}
         </View>
@@ -156,7 +157,7 @@ export default function QueueScreen() {
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>🎵</Text>
+      <Ionicons name="musical-notes" size={48} color="#ddd" />
       <Text style={styles.emptyTitle}>Your queue is empty</Text>
       <Text style={styles.emptySubtitle}>
         Add songs from the home screen to start playing
@@ -299,21 +300,12 @@ const styles = StyleSheet.create({
   removeBtn: {
     padding: 8,
   },
-  removeText: {
-    fontSize: 16,
-    color: "#FF3B30",
-    fontWeight: "bold",
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 60,
     paddingHorizontal: 40,
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 18,

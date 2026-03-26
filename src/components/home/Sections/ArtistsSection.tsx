@@ -9,6 +9,7 @@ import {
   Image,
 } from "react-native";
 
+import { Ionicons } from "@expo/vector-icons";
 import SongOptionsSheet, {
   SongData,
   SongOptionsSheetRef,
@@ -82,11 +83,11 @@ const ArtistsSection = () => {
             </View>
 
             <Pressable style={styles.playBtn} onPress={() => handlePlayPress(artist)}>
-              <Text style={styles.playIcon}>▶</Text>
+              <Ionicons name="play" size={18} color="orange" />
             </Pressable>
 
             <Pressable style={styles.moreBtn} onPress={() => handleMorePress(artist)}>
-              <Text style={styles.moreIcon}>⋮</Text>
+              <Ionicons name="ellipsis-vertical" size={18} color="#444" />
             </Pressable>
           </View>
         ))}
@@ -154,15 +155,7 @@ const styles = StyleSheet.create({
   playBtn: {
     marginHorizontal: 10,
   },
-  playIcon: {
-    fontSize: 18,
-    color: "orange",
-  },
   moreBtn: {
     paddingHorizontal: 6,
-  },
-  moreIcon: {
-    fontSize: 18,
-    color: "#444",
   },
 });

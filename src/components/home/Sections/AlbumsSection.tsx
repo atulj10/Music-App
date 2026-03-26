@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 
+import { Ionicons } from "@expo/vector-icons";
 import SongOptionsSheet, {
   SongData,
   SongOptionsSheetRef,
@@ -85,7 +86,7 @@ const AlbumsSection = () => {
                   style={styles.moreButton}
                   onPress={() => handleMorePress(album)}
                 >
-                  <Text style={styles.moreIcon}>⋮</Text>
+                  <Ionicons name="ellipsis-vertical" size={18} color="#444" />
                 </Pressable>
               </View>
               <Text style={styles.albumMeta} numberOfLines={1}>
@@ -168,8 +169,4 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   moreButton: {},
-  moreIcon: {
-    fontSize: 18,
-    color: "#444",
-  },
 });

@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { useSongs } from "../hooks/useSongs";
@@ -115,7 +116,7 @@ export default function SearchScreen() {
     if (hasSearched && searchResults.length === 0) {
       return (
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyIcon}>🔍</Text>
+          <Ionicons name="search" size={48} color="#ddd" />
           <Text style={styles.emptyTitle}>No results found</Text>
           <Text style={styles.emptySubtitle}>Try a different search term</Text>
         </View>
@@ -124,7 +125,7 @@ export default function SearchScreen() {
     
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyIcon}>🔍</Text>
+        <Ionicons name="search" size={48} color="#ddd" />
         <Text style={styles.emptyTitle}>Search for songs</Text>
         <Text style={styles.emptySubtitle}>Find your favorite music</Text>
       </View>
@@ -237,10 +238,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 60,
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 18,

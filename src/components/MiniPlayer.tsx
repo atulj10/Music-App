@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
+import { Ionicons } from "@expo/vector-icons";
 import { RootState } from "../store";
 import { useAudioPlayer } from "../hooks/useAudioPlayer";
 import { audioService } from "../services/AudioService";
@@ -53,15 +54,15 @@ export default function MiniPlayer() {
 
       <View style={styles.controls}>
         <Pressable onPress={playPrevious} style={styles.controlBtn}>
-          <Text style={styles.controlIcon}>⏮</Text>
+          <Ionicons name="play-skip-back" size={20} color="white" />
         </Pressable>
 
         <Pressable onPress={togglePlayPause} style={styles.playBtn}>
-          <Text style={styles.playIcon}>{isPlaying ? "⏸" : "▶"}</Text>
+          <Ionicons name={isPlaying ? "pause" : "play"} size={22} color="white" />
         </Pressable>
 
         <Pressable onPress={playNext} style={styles.controlBtn}>
-          <Text style={styles.controlIcon}>⏭</Text>
+          <Ionicons name="play-skip-forward" size={20} color="white" />
         </Pressable>
       </View>
     </Pressable>
@@ -71,7 +72,7 @@ export default function MiniPlayer() {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 60,
+    bottom: 80,
     left: 10,
     right: 10,
     height: 64,
@@ -116,15 +117,7 @@ const styles = StyleSheet.create({
   controlBtn: {
     padding: 4,
   },
-  controlIcon: {
-    fontSize: 16,
-    color: "white",
-  },
   playBtn: {
-    padding: 6,
-  },
-  playIcon: {
-    fontSize: 18,
-    color: "white",
+    padding: 4,
   },
 });

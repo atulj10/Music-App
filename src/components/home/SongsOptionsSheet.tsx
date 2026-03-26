@@ -8,16 +8,7 @@ import {
 } from "react-native";
 
 import RBSheet from "react-native-raw-bottom-sheet";
-
-import {
-  PlayNextIcon,
-  PlaylistIcon,
-  AlbumIcon,
-  ArtistIcon,
-  InfoIcon,
-  ShareIcon,
-  DeleteIcon,
-} from "../../assets/icons/MenuIcons";
+import { Ionicons } from "@expo/vector-icons";
 
 export interface SongData {
   id: string | number;
@@ -39,14 +30,14 @@ export interface SongOptionsSheetRef {
 }
 
 const ACTIONS = [
-  { label: "Play Next", icon: PlayNextIcon, key: "playNext" },
-  { label: "Add to Playing Queue", icon: PlaylistIcon, key: "addToQueue" },
-  { label: "Add to Playlist", icon: PlaylistIcon, key: "addToPlaylist" },
-  { label: "Go to Album", icon: AlbumIcon, key: "goToAlbum" },
-  { label: "Go to Artist", icon: ArtistIcon, key: "goToArtist" },
-  { label: "Details", icon: InfoIcon, key: "details" },
-  { label: "Share", icon: ShareIcon, key: "share" },
-  { label: "Delete from Device", icon: DeleteIcon, key: "delete" },
+  { label: "Play Next", icon: "play-forward", key: "playNext" },
+  { label: "Add to Playing Queue", icon: "list", key: "addToQueue" },
+  { label: "Add to Playlist", icon: "heart-outline", key: "addToPlaylist" },
+  { label: "Go to Album", icon: "disc", key: "goToAlbum" },
+  { label: "Go to Artist", icon: "person", key: "goToArtist" },
+  { label: "Details", icon: "information-circle-outline", key: "details" },
+  { label: "Share", icon: "share-social-outline", key: "share" },
+  { label: "Delete from Device", icon: "trash-outline", key: "delete" },
 ];
 
 const SongOptionsSheet = forwardRef<SongOptionsSheetRef, Props>(
@@ -117,15 +108,13 @@ const SongOptionsSheet = forwardRef<SongOptionsSheetRef, Props>(
         <View style={styles.divider} />
 
         {ACTIONS.map((action) => {
-          const Icon = action.icon;
-
           return (
             <TouchableOpacity
               key={action.key}
               style={styles.row}
               onPress={() => handleActionPress(action.key)}
             >
-              <Icon size={22} />
+              <Ionicons name={action.icon as any} size={22} color="#333" />
 
               <Text style={styles.label}>
                 {action.label}

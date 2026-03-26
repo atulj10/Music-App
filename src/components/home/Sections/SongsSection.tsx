@@ -10,6 +10,7 @@ import {
   Image,
 } from "react-native";
 
+import { Ionicons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 
@@ -52,7 +53,7 @@ const SongItemRow = ({
       <Text style={styles.duration}>{item.duration}</Text>
 
       <Pressable onPress={onMore} style={styles.moreBtn} hitSlop={10}>
-        <Text style={styles.moreIcon}>⋮</Text>
+        <Ionicons name="ellipsis-vertical" size={18} color="#666" />
       </Pressable>
     </View>
   </Pressable>
@@ -187,8 +188,9 @@ const SongsSection = () => {
     <View style={styles.header}>
       <Text style={styles.count}>{songs.length} songs</Text>
 
-      <Pressable onPress={refetch}>
-        <Text style={styles.refreshText}>🔄 Refresh</Text>
+      <Pressable onPress={refetch} style={styles.refreshBtn}>
+        <Ionicons name="refresh" size={18} color="#FFA500" />
+        <Text style={styles.refreshText}> Refresh</Text>
       </Pressable>
     </View>
   );
@@ -301,6 +303,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  refreshBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
   listContent: {
     paddingBottom: 120,
   },
@@ -347,10 +354,6 @@ const styles = StyleSheet.create({
 
   moreBtn: {
     padding: 4,
-  },
-
-  moreIcon: {
-    fontSize: 20,
   },
 
   loadMoreContainer: {

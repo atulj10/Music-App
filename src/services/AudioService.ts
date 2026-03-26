@@ -1,4 +1,5 @@
 import { createAudioPlayer, AudioPlayer } from "expo-audio";
+import { downloadService } from "./downloadService";
 
 type ProgressCallback = (status: {
   isPlaying: boolean;
@@ -58,13 +59,12 @@ class AudioService {
   PLAYBACK
   */
 
-  async play(uri: string) {
+  async play(songId: string, uri: string) {
     try {
-      /*
-      Prevent restart if same song
-      */
+      const localUri = downloadService.getLocalUri(songId);
+      const audioUri = localUri || uri;
 
-      if (this.currentUri === uri) {
+      if (this.currentUri === audioUri) {
         if (!this.player.currentStatus?.playing) {
           await this.player.play();
         }
@@ -72,10 +72,10 @@ class AudioService {
         return;
       }
 
-      this.currentUri = uri;
+      this.currentUri = audioUri;
 
       await this.player.replace({
-        uri,
+        uri: audioUri,
       });
 
       await this.player.play();

@@ -8,6 +8,7 @@ import Home from "./tabs/Home";
 import Favourites from "./tabs/Favourites";
 import Settings from "./tabs/Settings";
 import Playlists from "./tabs/Playlists";
+import Downloads from "./tabs/Downloads";
 import PlayerScreen from "./screens/PlayerScreen";
 import SearchScreen from "./screens/SearchScreen";
 import { Text, View } from "react-native";
@@ -16,6 +17,7 @@ import { useEffect } from "react";
 import { setAudioModeAsync } from "expo-audio";
 import QueueLoader from "./components/QueueLoader";
 import QueuePersistence from "./components/QueuePersistence";
+import { downloadService } from "./services/downloadService";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -37,6 +39,8 @@ function TabNavigator() {
               iconName = focused ? "settings" : "settings-outline";
             } else if (route.name === "Queue") {
               iconName = focused ? "list" : "list-outline";
+            } else if (route.name === "Downloads") {
+              iconName = focused ? "download" : "download-outline";
             } else {
               iconName = "ellipse";
             }
@@ -57,6 +61,7 @@ function TabNavigator() {
         })}
       >
         <Tab.Screen name="Home" component={Home} />
+        <Tab.Screen name="Downloads" component={Downloads} />
         <Tab.Screen name="Favourites" component={Favourites} />
         <Tab.Screen name="Settings" component={Settings} />
         <Tab.Screen name="Queue" component={Playlists} />
@@ -76,6 +81,7 @@ export default function App() {
         shouldPlayInBackground: true,
         interruptionMode: "duckOthers",
       });
+      await downloadService.initialize();
     };
 
     setupAudio();

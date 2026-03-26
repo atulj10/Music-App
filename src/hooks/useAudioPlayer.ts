@@ -84,7 +84,7 @@ export function useAudioPlayer() {
 
   useEffect(() => {
     if (currentSong?.audio) {
-      audioService.play(currentSong.audio);
+      audioService.play(currentSong.id, currentSong.audio);
     }
   }, [currentSong?.id]);
 

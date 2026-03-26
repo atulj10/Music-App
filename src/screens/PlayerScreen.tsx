@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, Alert, ActivityIndicator } from "react-native";
 
 import Slider from "@react-native-community/slider";
 
@@ -22,6 +22,7 @@ import {
 } from "../store/slices/playerSlice";
 
 import { audioService } from "../services/AudioService";
+import { downloadService } from "../services/downloadService";
 
 const formatTime = (millis: number) => {
   const totalSeconds = Math.floor(millis / 1000);
@@ -55,6 +56,9 @@ export default function PlayerScreen() {
   const shuffleEnabled = useSelector(
     (state: RootState) => state.player.shuffleEnabled,
   );
+
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
 
   /*
   PROGRESS LISTENER
@@ -104,7 +108,7 @@ export default function PlayerScreen() {
     const currentUri = audioService.getCurrentUri();
 
     if (currentUri !== song.audio) {
-      audioService.play(song.audio);
+      audioService.play(song.id, song.audio);
 
       dispatch(play());
     }
@@ -136,6 +140,47 @@ export default function PlayerScreen() {
 
   const handleBackward = () => {
     audioService.seekBackward(10);
+  };
+
+  useEffect(() => {
+    if (song?.id) {
+      setIsDownloaded(downloadService.isDownloaded(song.id));
+    }
+  }, [song?.id]);
+
+  const handleDownload = async () => {
+    if (!song?.audio) return;
+
+    if (isDownloaded) {
+      Alert.alert(
+        "Delete Download",
+        "Remove offline version of this song?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              await downloadService.deleteSong(song.id);
+              setIsDownloaded(false);
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    setIsDownloading(true);
+    const localUri = await downloadService.downloadSong(song.id, song.audio, {
+      title: song.title,
+      artist: song.artist,
+      duration: song.duration,
+      image: song.image,
+    });
+    setIsDownloading(false);
+    if (localUri) {
+      setIsDownloaded(true);
+    }
   };
 
   if (!song)
@@ -231,6 +276,24 @@ export default function PlayerScreen() {
         </Pressable>
       </View>
 
+      {/* DOWNLOAD BUTTON */}
+
+      <Pressable 
+        style={styles.downloadBtn} 
+        onPress={handleDownload}
+        disabled={isDownloading}
+      >
+        {isDownloading ? (
+          <ActivityIndicator size="small" color="#FFA500" />
+        ) : (
+          <Ionicons
+            name={isDownloaded ? "checkmark-circle" : "download-outline"}
+            size={24}
+            color={isDownloaded ? "#4CAF50" : "#FFA500"}
+          />
+        )}
+      </Pressable>
+
       {/* QUEUE INFO */}
 
       <Text style={styles.queue}>
@@ -302,5 +365,10 @@ const styles = StyleSheet.create({
   queue: {
     marginTop: 20,
     color: "#666",
+  },
+
+  downloadBtn: {
+    marginTop: 16,
+    padding: 12,
   },
 });

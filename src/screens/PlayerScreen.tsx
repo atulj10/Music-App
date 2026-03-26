@@ -73,13 +73,16 @@ export default function PlayerScreen() {
   */
 
   useEffect(() => {
-    if (song?.audio) {
+    if (!song?.audio) return;
+
+    const currentUri = audioService.getCurrentUri();
+
+    if (currentUri !== song.audio) {
       audioService.play(song.audio);
 
       dispatch(play());
     }
   }, [song?.id]);
-
   /*
   CONTROLS
   */

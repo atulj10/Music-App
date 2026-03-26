@@ -14,12 +14,14 @@ class AudioService {
 
   private pollInterval: ReturnType<typeof setInterval> | null = null;
 
+  private currentUri: string | null = null;
+
   constructor() {
     this.player = createAudioPlayer();
   }
 
   /*
-  START POLLING ONLY WHEN NEEDED
+  START POLLING
   */
 
   private startPolling() {
@@ -34,6 +36,7 @@ class AudioService {
         isPlaying: status.playing || false,
 
         positionMillis: (status.currentTime || 0) * 1000,
+
         durationMillis: (status.duration || 0) * 1000,
 
         didJustFinish: status.didJustFinish || false,
@@ -57,6 +60,20 @@ class AudioService {
 
   async play(uri: string) {
     try {
+      /*
+      Prevent restart if same song
+      */
+
+      if (this.currentUri === uri) {
+        if (!this.player.currentStatus?.playing) {
+          await this.player.play();
+        }
+
+        return;
+      }
+
+      this.currentUri = uri;
+
       await this.player.replace({
         uri,
       });
@@ -134,6 +151,14 @@ class AudioService {
 
   isPlaying(): boolean {
     return this.getStatus().isPlaying;
+  }
+
+  /*
+  CURRENT TRACK
+  */
+
+  getCurrentUri() {
+    return this.currentUri;
   }
 
   /*

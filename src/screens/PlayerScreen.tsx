@@ -1,79 +1,121 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useEffect } from "react";
+
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-import { RootState } from "../store";
-import { setPosition, setDuration, playNext, playPrevious } from "../store/slices/playerSlice";
+
 import Slider from "@react-native-community/slider";
+
+import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
+
+import { useSelector, useDispatch } from "react-redux";
+
+import { RootState } from "../store";
+
+import {
+  setPosition,
+  setDuration,
+  playNext,
+  playPrevious,
+  play,
+  pause,
+} from "../store/slices/playerSlice";
+
 import { audioService } from "../services/AudioService";
 
 const formatTime = (millis: number) => {
   const totalSeconds = Math.floor(millis / 1000);
+
   const mins = Math.floor(totalSeconds / 60);
+
   const secs = totalSeconds % 60;
+
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-const PlayerScreen = () => {
+export default function PlayerScreen() {
   const dispatch = useDispatch();
-  const navigation = useNavigation<any>();
+
   const song = useSelector((state: RootState) => state.player.currentSong);
+
   const isPlaying = useSelector((state: RootState) => state.player.isPlaying);
+
   const position = useSelector((state: RootState) => state.player.position);
+
   const duration = useSelector((state: RootState) => state.player.duration);
+
   const queue = useSelector((state: RootState) => state.player.queue);
-  const currentIndex = useSelector((state: RootState) => state.player.currentIndex);
+
+  const currentIndex = useSelector(
+    (state: RootState) => state.player.currentIndex,
+  );
+
+  /*
+  PROGRESS LISTENER
+  */
 
   useEffect(() => {
-    const callback = (status: {
-      isPlaying: boolean;
-      positionMillis: number;
-      durationMillis: number;
-      didJustFinish: boolean;
-    }) => {
+    const callback = (status: any) => {
       dispatch(setPosition(status.positionMillis));
+
       dispatch(setDuration(status.durationMillis));
+
+      if (status.didJustFinish) {
+        dispatch(playNext());
+      }
     };
 
     audioService.addProgressListener(callback);
 
-    return () => {
-      audioService.removeProgressListener(callback);
-    };
-  }, [dispatch]);
+    return () => audioService.removeProgressListener(callback);
+  }, []);
+
+  /*
+  PLAY WHEN SONG CHANGES
+  */
 
   useEffect(() => {
     if (song?.audio) {
       audioService.play(song.audio);
+
+      dispatch(play());
     }
   }, [song?.id]);
+
+  /*
+  CONTROLS
+  */
 
   const handlePlayPause = async () => {
     if (isPlaying) {
       await audioService.pause();
+
+      dispatch(pause());
     } else {
       await audioService.resume();
+
+      dispatch(play());
     }
   };
 
   const handleSeek = async (value: number) => {
     await audioService.seekTo(value);
+
+    dispatch(setPosition(value));
   };
 
-  const handlePrevious = async () => {
-    dispatch(playPrevious());
-  };
-
-  const handleNext = async () => {
+  const handleNext = () => {
     dispatch(playNext());
   };
 
-  const handleSeekBackward = async () => {
-    await audioService.seekBackward(10);
+  const handlePrevious = () => {
+    dispatch(playPrevious());
   };
 
-  const handleSeekForward = async () => {
-    await audioService.seekForward(10);
+  const handleBackward = () => {
+    audioService.seekBackward(10);
+  };
+
+  const handleForward = () => {
+    audioService.seekForward(10);
   };
 
   if (!song) {
@@ -89,63 +131,66 @@ const PlayerScreen = () => {
       <Image source={song.image} style={styles.image} />
 
       <Text style={styles.title}>{song.title}</Text>
+
       <Text style={styles.artist}>{song.artist}</Text>
+
+      {/* PROGRESS */}
 
       <View style={styles.progressContainer}>
         <Slider
-          style={styles.slider}
           minimumValue={0}
           maximumValue={duration || 1}
           value={position}
+          onValueChange={(value) => dispatch(setPosition(value))}
           onSlidingComplete={handleSeek}
           minimumTrackTintColor="#FFA500"
           maximumTrackTintColor="#ddd"
           thumbTintColor="#FFA500"
         />
-        <View style={styles.timeContainer}>
-          <Text style={styles.time}>{formatTime(position)}</Text>
-          <Text style={styles.time}>{formatTime(duration)}</Text>
+
+        <View style={styles.timeRow}>
+          <Text>{formatTime(position)}</Text>
+
+          <Text>{formatTime(duration)}</Text>
         </View>
       </View>
 
+      {/* CONTROLS */}
+
       <View style={styles.controls}>
-        <Pressable style={styles.secondaryBtn} onPress={handlePrevious}>
-          <Text style={styles.controlIcon}>⏮</Text>
+        <Pressable onPress={handlePrevious}>
+          <Ionicons name="play-skip-back" size={28} />
         </Pressable>
 
-        <Pressable style={styles.secondaryBtn} onPress={handleSeekBackward}>
-          <Text style={styles.skipText}>-10</Text>
+        <Pressable onPress={handleBackward}>
+          <MaterialIcons name="replay-10" size={28} />
         </Pressable>
 
         <Pressable style={styles.playBtn} onPress={handlePlayPause}>
-          <Text style={styles.playIcon}>{isPlaying ? "⏸" : "▶"}</Text>
+          <Ionicons
+            name={isPlaying ? "pause" : "play"}
+            size={34}
+            color="#fff"
+          />
         </Pressable>
 
-        <Pressable style={styles.secondaryBtn} onPress={handleSeekForward}>
-          <Text style={styles.skipText}>+10</Text>
+        <Pressable onPress={handleForward}>
+          <MaterialIcons name="forward-10" size={28} />
         </Pressable>
 
-        <Pressable style={styles.secondaryBtn} onPress={handleNext}>
-          <Text style={styles.controlIcon}>⏭</Text>
+        <Pressable onPress={handleNext}>
+          <Ionicons name="play-skip-forward" size={28} />
         </Pressable>
       </View>
 
-      <View style={styles.queueInfo}>
-        <Text style={styles.queueText}>
-          {currentIndex + 1} / {queue.length} songs
-        </Text>
-        <Pressable 
-          style={styles.queueBtn}
-          onPress={() => navigation.navigate("Main", { screen: "Queue" })}
-        >
-          <Text style={styles.queueBtnText}>View Queue</Text>
-        </Pressable>
-      </View>
+      {/* QUEUE INFO */}
+
+      <Text style={styles.queue}>
+        {currentIndex + 1} / {queue.length} songs
+      </Text>
     </View>
   );
-};
-
-export default PlayerScreen;
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -153,101 +198,61 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    padding: 20,
   },
+
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
+
   image: {
     width: 280,
     height: 280,
-    borderRadius: 20,
-    marginBottom: 30,
+    borderRadius: 24,
+    marginBottom: 24,
   },
+
   title: {
     fontSize: 22,
-    fontWeight: "bold",
-    marginTop: 20,
+    fontWeight: "700",
     textAlign: "center",
   },
+
   artist: {
-    fontSize: 16,
     color: "#666",
-    marginTop: 8,
+    marginTop: 6,
   },
+
   progressContainer: {
     width: "100%",
-    marginTop: 30,
+    marginTop: 24,
   },
-  slider: {
-    width: "100%",
-    height: 40,
-  },
-  timeContainer: {
+
+  timeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 5,
   },
-  time: {
-    fontSize: 12,
-    color: "#666",
-  },
+
   controls: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 20,
-    gap: 15,
+    gap: 24,
+    marginTop: 28,
   },
+
   playBtn: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: "#FFA500",
     alignItems: "center",
     justifyContent: "center",
   },
-  playIcon: {
-    fontSize: 28,
-    color: "#fff",
-  },
-  secondaryBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#f0f0f0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  controlIcon: {
-    fontSize: 20,
-    color: "#333",
-  },
-  skipText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  queueInfo: {
+
+  queue: {
     marginTop: 20,
-    alignItems: "center",
-    gap: 12,
-  },
-  queueText: {
     color: "#666",
-    fontSize: 14,
-  },
-  queueBtn: {
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  queueBtnText: {
-    color: "#333",
-    fontWeight: "600",
-    fontSize: 14,
   },
 });

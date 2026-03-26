@@ -53,20 +53,44 @@ export default function PlayerScreen() {
   */
 
   useEffect(() => {
-    const callback = (status: any) => {
+    let handledFinish = false;
+
+    const callback = async (status: any) => {
       dispatch(setPosition(status.positionMillis));
 
       dispatch(setDuration(status.durationMillis));
 
-      if (status.didJustFinish) {
-        dispatch(playNext());
+      const isFinished =
+        status.durationMillis > 0 &&
+        status.positionMillis >= status.durationMillis - 500;
+
+      if (isFinished && !handledFinish) {
+        handledFinish = true;
+
+        const hasNext = currentIndex < queue.length - 1;
+
+        if (hasNext) {
+          dispatch(playNext());
+        } else {
+          // repeat current
+
+          await audioService.seekTo(0);
+
+          await audioService.resume();
+
+          dispatch(play());
+        }
+
+        setTimeout(() => {
+          handledFinish = false;
+        }, 1000);
       }
     };
 
     audioService.addProgressListener(callback);
 
     return () => audioService.removeProgressListener(callback);
-  }, []);
+  }, [currentIndex, queue.length]);
 
   /*
   PLAY WHEN SONG CHANGES

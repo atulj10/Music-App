@@ -3,41 +3,52 @@ import {
   View,
   Text,
   Image,
-  StyleSheet,
   Pressable,
+  StyleSheet,
 } from "react-native";
-import { useSelector } from "react-redux";
-import { RootState } from "../store";
+
 import { useNavigation } from "@react-navigation/native";
+
+import { useAudioPlayer } from "../hooks/useAudioPlayer";
 
 export default function MiniPlayer() {
   const navigation = useNavigation();
 
-  const song = useSelector(
-    (state: RootState) => state.player.currentSong
-  );
+  const {
+    currentSong,
+    isPlaying,
+    togglePlayPause,
+  } = useAudioPlayer();
 
-  if (!song) return null;
+  if (!currentSong) return null;
 
   return (
     <Pressable
       style={styles.container}
-      onPress={() => navigation.navigate("PlayerScreen")}
+      onPress={() =>
+        navigation.navigate("PlayerScreen")
+      }
     >
-      <Image source={song.image} style={styles.image} />
+      <Image
+        source={currentSong.image}
+        style={styles.image}
+      />
 
-      <View style={styles.info}>
-        <Text numberOfLines={1} style={styles.title}>
-          {song.title}
+      <View style={{ flex: 1 }}>
+        <Text numberOfLines={1}>
+          {currentSong.title}
         </Text>
 
-        <Text numberOfLines={1} style={styles.artist}>
-          {song.artist}
+        <Text numberOfLines={1}>
+          {currentSong.artist}
         </Text>
       </View>
 
-      <Text style={styles.icon}>⏸</Text>
-      <Text style={styles.icon}>⏭</Text>
+      <Pressable onPress={togglePlayPause}>
+        <Text style={styles.icon}>
+          {isPlaying ? "⏸" : "▶"}
+        </Text>
+      </Pressable>
     </Pressable>
   );
 }
@@ -46,21 +57,20 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
 
-    bottom: 60, // sits above tab bar
+    bottom: 60,
     left: 10,
     right: 10,
 
     height: 64,
 
     backgroundColor: "#2a2a2a",
+
     borderRadius: 12,
 
     flexDirection: "row",
     alignItems: "center",
 
     paddingHorizontal: 12,
-
-    elevation: 8,
   },
 
   image: {
@@ -69,24 +79,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 
-  info: {
-    flex: 1,
-    marginLeft: 10,
-  },
-
-  title: {
-    color: "white",
-    fontWeight: "600",
-  },
-
-  artist: {
-    color: "#aaa",
-    fontSize: 12,
-  },
-
   icon: {
+    fontSize: 22,
     color: "white",
-    fontSize: 18,
-    marginLeft: 16,
   },
 });

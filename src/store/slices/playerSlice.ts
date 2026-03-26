@@ -1,13 +1,16 @@
-// store/playerSlice.ts
-
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Song {
-  id: number | string;
+  id: string;
   title: string;
   artist: string;
   duration: string;
-  image: { uri: string };
+
+  image: {
+    uri: string;
+  };
+
+  audio: string;
 }
 
 interface PlayerState {
@@ -23,17 +26,21 @@ const initialState: PlayerState = {
 const playerSlice = createSlice({
   name: "player",
   initialState,
+
   reducers: {
-    setCurrentSong: (state, action: PayloadAction<Song>) => {
+    setCurrentSong: (
+      state,
+      action: PayloadAction<Song>
+    ) => {
       state.currentSong = action.payload;
       state.isPlaying = true;
     },
 
-    playSong: (state) => {
+    play: (state) => {
       state.isPlaying = true;
     },
 
-    pauseSong: (state) => {
+    pause: (state) => {
       state.isPlaying = false;
     },
   },
@@ -41,8 +48,8 @@ const playerSlice = createSlice({
 
 export const {
   setCurrentSong,
-  playSong,
-  pauseSong,
+  play,
+  pause,
 } = playerSlice.actions;
 
 export default playerSlice.reducer;

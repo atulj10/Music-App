@@ -14,6 +14,7 @@ export interface SongItem {
   artist: string;
   duration: string;
   image: { uri: string };
+  audio: string; 
 }
 
 interface VerticalListProps {

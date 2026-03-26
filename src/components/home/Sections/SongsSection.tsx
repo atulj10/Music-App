@@ -1,46 +1,93 @@
 import React, { useRef, useState } from "react";
+
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
   ActivityIndicator,
-  ScrollView,
-  Dimensions,
 } from "react-native";
+
 import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 
-import VerticalList, { SongItem } from "../../VerticalList";
+import VerticalList, {
+  SongItem,
+} from "../../VerticalList";
+
 import SongOptionsSheet, {
   SongData,
   SongOptionsSheetRef,
 } from "../SongsOptionsSheet";
 
 import { useSongs } from "../../../hooks/useSongs";
-import { setCurrentSong } from "../../../store/slices/playerSlice";
+
+import {
+  setCurrentSong,
+} from "../../../store/slices/playerSlice";
+
+import {
+  audioService,
+} from "../../../services/AudioService";
 
 const SongsSection = () => {
   const navigation = useNavigation<any>();
+
   const dispatch = useDispatch();
-  const bottomSheetRef = useRef<SongOptionsSheetRef>(null);
 
-  const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
+  const bottomSheetRef =
+    useRef<SongOptionsSheetRef>(null);
 
-  const { songs, loading, error } = useSongs("top hindi songs");
+  const [selectedSong, setSelectedSong] =
+    useState<SongData | null>(null);
 
-  const handlePlayPress = (song: SongItem) => {
-    dispatch(setCurrentSong({
-      id: song.id,
-      title: song.title,
-      artist: song.artist,
-      duration: song.duration,
-      image: song.image,
-    }));
-    navigation.navigate("PlayerScreen");
+  const {
+    songs,
+    loading,
+    error,
+  } = useSongs("top hindi songs");
+
+  const handlePlayPress = async (
+    song: SongItem
+  ) => {
+    try {
+      if (!song.audio) {
+        console.log("No audio URL");
+        return;
+      }
+
+      // PLAY AUDIO
+      await audioService.play(
+        song.audio
+      );
+
+      // UPDATE REDUX
+      dispatch(
+        setCurrentSong({
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          duration: song.duration,
+          image: song.image,
+          audio: song.audio,
+        })
+      );
+
+      // NAVIGATE
+      navigation.navigate(
+        "PlayerScreen"
+      );
+    } catch (error) {
+      console.log(
+        "Play error:",
+        error
+      );
+    }
   };
 
-  const handleMorePress = (song: SongItem) => {
+  const handleMorePress = (
+    song: SongItem
+  ) => {
     setSelectedSong({
       id: song.id,
       title: song.title,
@@ -54,19 +101,44 @@ const SongsSection = () => {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="orange" />
+      <View
+        style={
+          styles.centerContainer
+        }
+      >
+        <ActivityIndicator
+          size="large"
+          color="orange"
+        />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Failed to load songs</Text>
+      <View
+        style={
+          styles.centerContainer
+        }
+      >
+        <Text
+          style={
+            styles.errorText
+          }
+        >
+          Failed to load songs
+        </Text>
 
-        <Pressable onPress={() => {}}>
-          <Text style={{ color: "orange" }}>Retry</Text>
+        <Pressable
+          onPress={() => {}}
+        >
+          <Text
+            style={{
+              color: "orange",
+            }}
+          >
+            Retry
+          </Text>
         </Pressable>
       </View>
     );
@@ -74,63 +146,72 @@ const SongsSection = () => {
 
   return (
     <View style={styles.container}>
-      {/* <ScrollView style={styles.scrollContainer}> */}
       <View style={styles.header}>
-        <Text style={styles.count}>{songs.length} songs</Text>
+        <Text style={styles.count}>
+          {songs.length} songs
+        </Text>
 
         <Pressable>
-          <Text style={styles.sort}>Ascending ↑↓</Text>
+          <Text style={styles.sort}>
+            Ascending ↑↓
+          </Text>
         </Pressable>
       </View>
 
       <VerticalList
         data={songs}
-        onMorePress={handleMorePress}
-        onPlayPress={handlePlayPress}
+        onMorePress={
+          handleMorePress
+        }
+        onPlayPress={
+          handlePlayPress
+        }
       />
-      {/* </ScrollView> */}
-      <SongOptionsSheet ref={bottomSheetRef} song={selectedSong} />
+
+      <SongOptionsSheet
+        ref={bottomSheetRef}
+        song={selectedSong}
+      />
     </View>
   );
 };
 
 export default SongsSection;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
+const styles =
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 16,
+    },
 
-  scrollContainer: {
-    flex: 1,
-  },
+    centerContainer: {
+      height: 200,
+      justifyContent:
+        "center",
+      alignItems: "center",
+    },
 
-  centerContainer: {
-    height: 200,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+    header: {
+      flexDirection: "row",
+      justifyContent:
+        "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+    },
 
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
+    count: {
+      fontWeight: "700",
+      fontSize: 16,
+    },
 
-  count: {
-    fontWeight: "700",
-    fontSize: 16,
-  },
+    sort: {
+      color: "orange",
+      fontWeight: "700",
+    },
 
-  sort: {
-    color: "orange",
-    fontWeight: "700",
-  },
-
-  errorText: {
-    color: "grey",
-    marginBottom: 10,
-  },
-});
+    errorText: {
+      color: "grey",
+      marginBottom: 10,
+    },
+  });

@@ -19,39 +19,12 @@ import {
   clearQueue,
   Song,
 } from "../store/slices/playerSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const QUEUE_STORAGE_KEY = "@music_player_queue";
 
 export default function QueueScreen() {
   const dispatch = useDispatch();
   const queue = useSelector((state: RootState) => state.player.queue);
   const currentIndex = useSelector((state: RootState) => state.player.currentIndex);
   const [isEditMode, setIsEditMode] = useState(false);
-
-  useEffect(() => {
-    saveQueueToStorage(queue);
-  }, [queue]);
-
-  const saveQueueToStorage = async (queueToSave: Song[]) => {
-    try {
-      await AsyncStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(queueToSave));
-    } catch (error) {
-      console.log("Error saving queue:", error);
-    }
-  };
-
-  const loadQueueFromStorage = async () => {
-    try {
-      const savedQueue = await AsyncStorage.getItem(QUEUE_STORAGE_KEY);
-      if (savedQueue) {
-        return JSON.parse(savedQueue);
-      }
-    } catch (error) {
-      console.log("Error loading queue:", error);
-    }
-    return [];
-  };
 
   const handleRemoveFromQueue = (index: number) => {
     Alert.alert(

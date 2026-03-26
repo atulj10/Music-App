@@ -14,6 +14,8 @@ import { Text, View } from "react-native";
 import MiniPlayer from "./components/MiniPlayer";
 import { useEffect } from "react";
 import { setAudioModeAsync } from "expo-audio";
+import QueueLoader from "./components/QueueLoader";
+import QueuePersistence from "./components/QueuePersistence";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -82,6 +84,11 @@ export default function App() {
   return (
     <Provider store={store}>
       <NavigationContainer>
+        {/* Load saved queue on startup */}
+        <QueueLoader />
+
+        {/* Save queue automatically */}
+        <QueuePersistence />
         <Stack.Navigator>
           <Stack.Screen
             name="Main"

@@ -4,7 +4,7 @@ import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 
 import Slider from "@react-native-community/slider";
 
-import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -17,6 +17,8 @@ import {
   playPrevious,
   play,
   pause,
+  toggleShuffle,
+  cycleRepeatMode,
 } from "../store/slices/playerSlice";
 
 import { audioService } from "../services/AudioService";
@@ -48,6 +50,12 @@ export default function PlayerScreen() {
     (state: RootState) => state.player.currentIndex,
   );
 
+  const repeatMode = useSelector((state: RootState) => state.player.repeatMode);
+
+  const shuffleEnabled = useSelector(
+    (state: RootState) => state.player.shuffleEnabled,
+  );
+
   /*
   PROGRESS LISTENER
   */
@@ -67,18 +75,12 @@ export default function PlayerScreen() {
       if (isFinished && !handledFinish) {
         handledFinish = true;
 
-        const hasNext = currentIndex < queue.length - 1;
-
-        if (hasNext) {
-          dispatch(playNext());
-        } else {
-          // repeat current
-
+        if (repeatMode === "one") {
           await audioService.seekTo(0);
 
           await audioService.resume();
-
-          dispatch(play());
+        } else {
+          dispatch(playNext());
         }
 
         setTimeout(() => {
@@ -90,7 +92,7 @@ export default function PlayerScreen() {
     audioService.addProgressListener(callback);
 
     return () => audioService.removeProgressListener(callback);
-  }, [currentIndex, queue.length]);
+  }, [currentIndex, queue.length, repeatMode]);
 
   /*
   PLAY WHEN SONG CHANGES
@@ -107,6 +109,7 @@ export default function PlayerScreen() {
       dispatch(play());
     }
   }, [song?.id]);
+
   /*
   CONTROLS
   */
@@ -114,11 +117,9 @@ export default function PlayerScreen() {
   const handlePlayPause = async () => {
     if (isPlaying) {
       await audioService.pause();
-
       dispatch(pause());
     } else {
       await audioService.resume();
-
       dispatch(play());
     }
   };
@@ -129,29 +130,20 @@ export default function PlayerScreen() {
     dispatch(setPosition(value));
   };
 
-  const handleNext = () => {
-    dispatch(playNext());
-  };
-
-  const handlePrevious = () => {
-    dispatch(playPrevious());
+  const handleForward = () => {
+    audioService.seekForward(10);
   };
 
   const handleBackward = () => {
     audioService.seekBackward(10);
   };
 
-  const handleForward = () => {
-    audioService.seekForward(10);
-  };
-
-  if (!song) {
+  if (!song)
     return (
       <View style={styles.center}>
         <Text>No song selected</Text>
       </View>
     );
-  }
 
   return (
     <View style={styles.container}>
@@ -168,7 +160,6 @@ export default function PlayerScreen() {
           minimumValue={0}
           maximumValue={duration || 1}
           value={position}
-          onValueChange={(value) => dispatch(setPosition(value))}
           onSlidingComplete={handleSeek}
           minimumTrackTintColor="#FFA500"
           maximumTrackTintColor="#ddd"
@@ -185,13 +176,29 @@ export default function PlayerScreen() {
       {/* CONTROLS */}
 
       <View style={styles.controls}>
-        <Pressable onPress={handlePrevious}>
+        {/* SHUFFLE */}
+
+        <Pressable onPress={() => dispatch(toggleShuffle())}>
+          <MaterialIcons
+            name="shuffle"
+            size={26}
+            color={shuffleEnabled ? "#FFA500" : "#666"}
+          />
+        </Pressable>
+
+        {/* PREVIOUS */}
+
+        <Pressable onPress={() => dispatch(playPrevious())}>
           <Ionicons name="play-skip-back" size={28} />
         </Pressable>
+
+        {/* -10 */}
 
         <Pressable onPress={handleBackward}>
           <MaterialIcons name="replay-10" size={28} />
         </Pressable>
+
+        {/* PLAY */}
 
         <Pressable style={styles.playBtn} onPress={handlePlayPause}>
           <Ionicons
@@ -201,19 +208,33 @@ export default function PlayerScreen() {
           />
         </Pressable>
 
+        {/* +10 */}
+
         <Pressable onPress={handleForward}>
           <MaterialIcons name="forward-10" size={28} />
         </Pressable>
 
-        <Pressable onPress={handleNext}>
+        {/* NEXT */}
+
+        <Pressable onPress={() => dispatch(playNext())}>
           <Ionicons name="play-skip-forward" size={28} />
+        </Pressable>
+
+        {/* REPEAT */}
+
+        <Pressable onPress={() => dispatch(cycleRepeatMode())}>
+          <MaterialIcons
+            name={repeatMode === "one" ? "repeat-one" : "repeat"}
+            size={26}
+            color={repeatMode === "off" ? "#666" : "#FFA500"}
+          />
         </Pressable>
       </View>
 
       {/* QUEUE INFO */}
 
       <Text style={styles.queue}>
-        {currentIndex + 1} / {queue.length} songs
+        {currentIndex + 1} / {queue.length}
       </Text>
     </View>
   );
@@ -222,7 +243,6 @@ export default function PlayerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
@@ -244,7 +264,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "700",
-    textAlign: "center",
   },
 
   artist: {
@@ -265,8 +284,10 @@ const styles = StyleSheet.create({
   controls: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 24,
+    gap: 20,
     marginTop: 28,
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
 
   playBtn: {

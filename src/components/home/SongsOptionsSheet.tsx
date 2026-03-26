@@ -29,6 +29,8 @@ export interface SongData {
 
 interface Props {
   song: SongData | null;
+  onPlayNext?: () => void;
+  onAddToQueue?: () => void;
 }
 
 export interface SongOptionsSheetRef {
@@ -37,18 +39,18 @@ export interface SongOptionsSheetRef {
 }
 
 const ACTIONS = [
-  { label: "Play Next", icon: PlayNextIcon },
-  { label: "Add to Playing Queue", icon: PlaylistIcon },
-  { label: "Add to Playlist", icon: PlaylistIcon },
-  { label: "Go to Album", icon: AlbumIcon },
-  { label: "Go to Artist", icon: ArtistIcon },
-  { label: "Details", icon: InfoIcon },
-  { label: "Share", icon: ShareIcon },
-  { label: "Delete from Device", icon: DeleteIcon },
+  { label: "Play Next", icon: PlayNextIcon, key: "playNext" },
+  { label: "Add to Playing Queue", icon: PlaylistIcon, key: "addToQueue" },
+  { label: "Add to Playlist", icon: PlaylistIcon, key: "addToPlaylist" },
+  { label: "Go to Album", icon: AlbumIcon, key: "goToAlbum" },
+  { label: "Go to Artist", icon: ArtistIcon, key: "goToArtist" },
+  { label: "Details", icon: InfoIcon, key: "details" },
+  { label: "Share", icon: ShareIcon, key: "share" },
+  { label: "Delete from Device", icon: DeleteIcon, key: "delete" },
 ];
 
 const SongOptionsSheet = forwardRef<SongOptionsSheetRef, Props>(
-  ({ song }: Props, ref: React.Ref<SongOptionsSheetRef>) => {
+  ({ song, onPlayNext, onAddToQueue }: Props, ref: React.Ref<SongOptionsSheetRef>) => {
     const sheetRef = useRef<any>(null);
 
     useImperativeHandle(ref, () => ({
@@ -56,7 +58,17 @@ const SongOptionsSheet = forwardRef<SongOptionsSheetRef, Props>(
       close: () => sheetRef.current?.close(),
     }));
 
-    const handleActionPress = () => {
+    const handleActionPress = (key: string) => {
+      switch (key) {
+        case "playNext":
+          onPlayNext?.();
+          break;
+        case "addToQueue":
+          onAddToQueue?.();
+          break;
+        default:
+          break;
+      }
       sheetRef.current?.close();
     };
 
@@ -104,14 +116,14 @@ const SongOptionsSheet = forwardRef<SongOptionsSheetRef, Props>(
 
         <View style={styles.divider} />
 
-        {ACTIONS.map((action, index) => {
+        {ACTIONS.map((action) => {
           const Icon = action.icon;
 
           return (
             <TouchableOpacity
-              key={index}
+              key={action.key}
               style={styles.row}
-              onPress={handleActionPress}
+              onPress={() => handleActionPress(action.key)}
             >
               <Icon size={22} />
 

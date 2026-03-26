@@ -1,11 +1,16 @@
-import { Text, View, StyleSheet, Dimensions } from "react-native";
+import { Text, View, StyleSheet, Pressable } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import SearchIcon from "../../assets/icons/SearchIcon";
 
 const CustomHeader = () => {
+  const navigation = useNavigation<any>();
+
   return (
     <View style={styles.header}>
       <Text style={styles.logo}>🎵 MUME</Text>
-      <SearchIcon />
+      <Pressable onPress={() => navigation.navigate("SearchScreen")}>
+        <SearchIcon />
+      </Pressable>
     </View>
   );
 };
@@ -17,6 +22,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 10,
     paddingRight: 15,
   },

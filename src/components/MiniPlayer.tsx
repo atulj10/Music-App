@@ -1,54 +1,69 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-} from "react-native";
-
+import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 import { useAudioPlayer } from "../hooks/useAudioPlayer";
+import { audioService } from "../services/AudioService";
+
+const formatTime = (millis: number) => {
+  const totalSeconds = Math.floor(millis / 1000);
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
 
 export default function MiniPlayer() {
-  const navigation = useNavigation();
-
+  const navigation = useNavigation<any>();
+  
   const {
     currentSong,
     isPlaying,
     togglePlayPause,
+    playNext,
+    playPrevious,
+    position,
+    duration,
   } = useAudioPlayer();
 
+  const currentIndex = useSelector((state: RootState) => state.player.currentIndex);
+  const queue = useSelector((state: RootState) => state.player.queue);
+
   if (!currentSong) return null;
+
+  const progress = duration > 0 ? (position / duration) * 100 : 0;
 
   return (
     <Pressable
       style={styles.container}
-      onPress={() =>
-        navigation.navigate("PlayerScreen")
-      }
+      onPress={() => navigation.navigate("PlayerScreen")}
     >
-      <Image
-        source={currentSong.image}
-        style={styles.image}
-      />
+      <View style={[styles.progressBar, { width: `${progress}%` }]} />
+      
+      <Image source={currentSong.image} style={styles.image} />
 
-      <View style={{ flex: 1 }}>
-        <Text numberOfLines={1}>
+      <View style={styles.info}>
+        <Text numberOfLines={1} style={styles.title}>
           {currentSong.title}
         </Text>
-
-        <Text numberOfLines={1}>
+        <Text numberOfLines={1} style={styles.artist}>
           {currentSong.artist}
         </Text>
       </View>
 
-      <Pressable onPress={togglePlayPause}>
-        <Text style={styles.icon}>
-          {isPlaying ? "⏸" : "▶"}
-        </Text>
-      </Pressable>
+      <View style={styles.controls}>
+        <Pressable onPress={playPrevious} style={styles.controlBtn}>
+          <Text style={styles.controlIcon}>⏮</Text>
+        </Pressable>
+
+        <Pressable onPress={togglePlayPause} style={styles.playBtn}>
+          <Text style={styles.playIcon}>{isPlaying ? "⏸" : "▶"}</Text>
+        </Pressable>
+
+        <Pressable onPress={playNext} style={styles.controlBtn}>
+          <Text style={styles.controlIcon}>⏭</Text>
+        </Pressable>
+      </View>
     </Pressable>
   );
 }
@@ -56,31 +71,60 @@ export default function MiniPlayer() {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-
     bottom: 60,
     left: 10,
     right: 10,
-
     height: 64,
-
     backgroundColor: "#2a2a2a",
-
     borderRadius: 12,
-
     flexDirection: "row",
     alignItems: "center",
-
     paddingHorizontal: 12,
+    overflow: "hidden",
   },
-
+  progressBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    height: 3,
+    backgroundColor: "#FFA500",
+  },
   image: {
     width: 44,
     height: 44,
     borderRadius: 8,
   },
-
-  icon: {
-    fontSize: 22,
+  info: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  title: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  artist: {
+    color: "#aaa",
+    fontSize: 12,
+    marginTop: 2,
+  },
+  controls: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  controlBtn: {
+    padding: 4,
+  },
+  controlIcon: {
+    fontSize: 16,
+    color: "white",
+  },
+  playBtn: {
+    padding: 6,
+  },
+  playIcon: {
+    fontSize: 18,
     color: "white",
   },
 });

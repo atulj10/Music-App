@@ -8,6 +8,7 @@ import Favourites from "./tabs/Favourites";
 import Settings from "./tabs/Settings";
 import Playlists from "./tabs/Playlists";
 import PlayerScreen from "./screens/PlayerScreen";
+import SearchScreen from "./screens/SearchScreen";
 import { Text, View } from "react-native";
 import MiniPlayer from "./components/MiniPlayer";
 
@@ -21,7 +22,7 @@ function TabNavigator() {
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Favourites" component={Favourites} />
         <Tab.Screen name="Settings" component={Settings} />
-        <Tab.Screen name="Playlists" component={Playlists} />
+        <Tab.Screen name="Queue" component={Playlists} />
       </Tab.Navigator>
 
       <MiniPlayer />
@@ -43,6 +44,11 @@ export default function App() {
             name="PlayerScreen"
             component={PlayerScreen}
             options={{ title: "Now Playing" }}
+          />
+          <Stack.Screen
+            name="SearchScreen"
+            component={SearchScreen}
+            options={{ title: "Search" }}
           />
         </Stack.Navigator>
       </NavigationContainer>

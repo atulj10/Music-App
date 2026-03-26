@@ -25,13 +25,13 @@ A React Native music player app built with Expo that streams music from JioSaavn
 npm install
 
 # Start the development server
-npx expo start
+npm start
 
 # Run on Android
-npx expo run:android
+npm run:android
 
 # Run on iOS
-npx expo run:ios
+npm run:ios
 ```
 
 ### Environment Requirements

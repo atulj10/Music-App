@@ -11,6 +11,8 @@ import PlayerScreen from "./screens/PlayerScreen";
 import SearchScreen from "./screens/SearchScreen";
 import { Text, View } from "react-native";
 import MiniPlayer from "./components/MiniPlayer";
+import { useEffect } from "react";
+import { setAudioModeAsync } from "expo-audio";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -31,6 +33,19 @@ function TabNavigator() {
 }
 
 export default function App() {
+
+  useEffect(() => {
+    const setupAudio = async () => {
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+        interruptionMode: "duckOthers",
+      });
+    };
+
+    setupAudio();
+  }, []);
+
   return (
     <Provider store={store}>
       <NavigationContainer>
